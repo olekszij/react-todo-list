@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import './App.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faTrashCan,
-  faToggleOff,
-  faToggleOn,
-} from '@fortawesome/free-solid-svg-icons';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-library.add(faTrashCan, faToggleOff, faToggleOn);
+library.add(faTrashCan);
 
 function App() {
   const [tasks, setTasks] = useState([]);
