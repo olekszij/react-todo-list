@@ -26,18 +26,20 @@ function App() {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingValue, setEditingValue] = useState('');
 
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
+
   // Получение информации о пользователе при загрузке страницы
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const response = await axios.get('https://react-todo-list-by-me.netlify.app/user', { withCredentials: true });
+        const response = await axios.get(`${serverUrl}/user`, { withCredentials: true });
         setUser(response.data);
       } catch (error) {
         setUser(null);
       }
     };
     checkUser();
-  }, []);
+  }, [serverUrl]);
 
   // Получение задач из Firestore только если пользователь авторизован
   useEffect(() => {
@@ -65,11 +67,11 @@ function App() {
   }, [user]);
 
   const handleLogin = () => {
-    window.open('https://react-todo-list-by-me.netlify.app/auth/google', '_self');
+    window.open(`${serverUrl}/auth/google`, '_self');
   };
 
   const handleLogout = () => {
-    window.open('https://react-todo-list-by-me.netlify.app/logout', '_self');
+    window.open(`${serverUrl}/logout`, '_self');
     setUser(null);
     setTasks([]); // Очистка задач после выхода
   };
