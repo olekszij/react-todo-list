@@ -1,15 +1,13 @@
+// Frontend Code (React)
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { db } from './firebaseConfig';
 import {
   collection,
-  getDocs,
   addDoc,
   deleteDoc,
   updateDoc,
   doc,
-  query,
-  where,
 } from 'firebase/firestore';
 import './App.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -28,7 +26,6 @@ function App() {
 
   const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-  // Получение информации о пользователе при загрузке страницы
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -41,19 +38,13 @@ function App() {
     checkUser();
   }, [serverUrl]);
 
-  // Получение задач из Firestore только если пользователь авторизован
   useEffect(() => {
     if (user) {
       const fetchTasks = async () => {
         setLoading(true);
         try {
-          const q = query(collection(db, 'tasks'), where('userEmail', '==', user.email));
-          const querySnapshot = await getDocs(q);
-          const tasksArray = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setTasks(tasksArray);
+          const response = await axios.get(`${serverUrl}/tasks`, { withCredentials: true });
+          setTasks(response.data);
         } catch (error) {
           console.error('Ошибка при получении задач:', error);
         } finally {
@@ -62,9 +53,9 @@ function App() {
       };
       fetchTasks();
     } else {
-      setTasks([]); // Очистка задач, если пользователь не авторизован
+      setTasks([]);
     }
-  }, [user]);
+  }, [user, serverUrl]);
 
   const handleLogin = () => {
     window.open(`${serverUrl}/auth/google`, '_self');
@@ -73,7 +64,7 @@ function App() {
   const handleLogout = () => {
     window.open(`${serverUrl}/logout`, '_self');
     setUser(null);
-    setTasks([]); // Очистка задач после выхода
+    setTasks([]);
   };
 
   const handleChange = (event) => {
@@ -86,7 +77,6 @@ function App() {
     }
   };
 
-  // Добавление новой задачи в Firestore
   const addTask = async () => {
     if (!user) {
       alert('Please login to add a task');
@@ -97,7 +87,7 @@ function App() {
       const newTask = {
         title: inputValue,
         completed: false,
-        userEmail: user.email, // Привязка задачи к пользователю
+        userId: user.id,
       };
 
       try {
@@ -113,7 +103,6 @@ function App() {
     }
   };
 
-  // Обновление статуса задачи в Firestore
   const toggleTaskCompletion = async (taskId, currentStatus) => {
     if (!user) {
       alert('Please login to update a task');
@@ -138,13 +127,11 @@ function App() {
     }
   };
 
-  // Начало редактирования задачи
   const startEditingTask = (taskId, currentTitle) => {
     setEditingTaskId(taskId);
     setEditingValue(currentTitle);
   };
 
-  // Сохранение изменений задачи в Firestore
   const saveTask = async (taskId) => {
     if (!user) {
       alert('Please login to edit a task');
@@ -171,7 +158,6 @@ function App() {
     }
   };
 
-  // Удаление задачи из Firestore
   const deleteTask = async (taskId) => {
     if (!user) {
       alert('Please login to delete a task');
